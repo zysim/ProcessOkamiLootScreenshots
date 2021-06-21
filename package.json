@@ -1,0 +1,19 @@
+{
+  "name": "cropimages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js",
+    "verify": "node verify.js",
+    "clear": "rm -rf Out && mkdir Out",
+    "move": "node move.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "sharp": "^0.28.3"
+  },
+  "type": "module"
+}
