@@ -1,6 +1,6 @@
 # ProcessScreenshots
 
-This project was for processing screenshots of Okami loot that I took, along with Auride's and Ky's screenshots, both for display in the [Okami Map](https://dshepsis.github.io/OkamiMap) and long-term storage (in my Drive folder). This can basically be used for any more screenshots I take in the future, if that ever happens.
+This project was for processing screenshots of Okami loot that I took, along with Auride's and Ky's screenshots, both for display in the [Okami Map](https://dshepsis.github.io/OkamiMap) and long-term storage (in my Drive folder). This can basically be used for any more screenshots I take in the future, if that ever happens. (EDIT as of 23/06/2021: It _has_ happened)
 
 ## Folder Structure
 - In: For my own screenshots to be processed
