@@ -11,7 +11,7 @@
     "move": "node move.js"
   },
   "author": "",
-  "license": "MIT",
+  "license": "APGL-3.0-or-later",
   "devDependencies": {
     "sharp": "^0.28.3"
   },

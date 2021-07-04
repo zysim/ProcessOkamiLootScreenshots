@@ -1,3 +1,20 @@
+<!--
+ProcessScreenshots - Processes screenshots for https://dshepsis.github.io/OkamiMap
+Copyright (C) 2021  ZY Sim
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
 # ProcessScreenshots
 
 This project was for processing screenshots of Okami loot that I took, along with Auride's and Ky's screenshots, both for display in the [Okami Map](https://dshepsis.github.io/OkamiMap) and long-term storage (in my Drive folder). This can basically be used for any more screenshots I take in the future, if that ever happens. (EDIT as of 23/06/2021: It _has_ happened)

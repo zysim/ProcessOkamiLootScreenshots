@@ -1,3 +1,21 @@
+/**
+ * ProcessScreenshots - Processes screenshots for https://dshepsis.github.io/OkamiMap
+ * Copyright (C) 2021  ZY Sim
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import fs from 'fs/promises'
 import path from 'path'
 import sharp from 'sharp'
@@ -149,4 +167,10 @@ const run = async ({ baseInputDir, mapper }, files = null) =>
     : await filterExistingFiles(baseInputDir, OUT_DIR)
   ).forEach(mapper)
 
-run(mine, ["Wep'keer/sb83.png"])
+const test = async ({ baseInputDir, mapper }, files = null) =>
+  files
+    ? files.map(f => `${baseInputDir}/${f}`)
+    : await filterExistingFiles(baseInputDir, OUT_DIR)
+
+// test(mine)
+run(mine)
