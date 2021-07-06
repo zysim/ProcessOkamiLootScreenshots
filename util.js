@@ -23,6 +23,7 @@ import path from 'path'
  * Lists all files in a directory recursively. Returns full paths, relative to `dir`.
  *
  * @param {string} dir The base directory to search for files.
+ * @returns {Promise<string[]>}
  */
 export const listAllFilesInDirectory = async dir => {
   const [dirEnts, error] = await oneLiner(fs.readdir, dir, {
@@ -42,6 +43,11 @@ export const listAllFilesInDirectory = async dir => {
   }, [])
 }
 
+/**
+ * @param {string} inDir
+ * @param {string} outDir
+ * @returns {Promise<string[]>}
+ */
 export const filterExistingFiles = async (inDir, outDir) => {
   const inputFilesWithoutExtensions = await listAllFilesInDirectory(inDir)
   const outputFiles = await listAllFilesInDirectory(outDir)
@@ -58,6 +64,11 @@ export const filterExistingFiles = async (inDir, outDir) => {
   return r
 }
 
+/**
+ * @param {Function} cb
+ * @param {...any} args
+ * @returns {Promise<[?any, ?Error]>}
+ */
 export const oneLiner = async (cb, ...args) => {
   try {
     const data = cb.apply(null, args)
@@ -73,6 +84,7 @@ export const oneLiner = async (cb, ...args) => {
  *
  * Return paths include the base path itself.
  * @param {string} base The path to the base directory.
+ * @returns {Promise<string[]>}
  */
 const getAllDirs = async base =>
   (await fs.readdir(base, { withFileTypes: true })).reduce(
@@ -92,6 +104,7 @@ const getAllDirs = async base =>
  * @param {string} dir The directory (aka map) to scan through
  * @param {boolean} test Set this to `true` if you'd like to only see which files would
  * be deleted, without the deletion actually happening. Defaults to `false`.
+ * @returns {Promise<void>}
  */
 export const removeAnimalImagesInLootFolder = async (dir, test = false) => {
   try {
@@ -126,8 +139,9 @@ export const removeAnimalImagesInLootFolder = async (dir, test = false) => {
  *
  * @param {boolean} test Set to `true` to simply list out dupes without deleting
  * anything. Defaults to `false`.
+ * @returns {void}
  */
-export const removeAnimalImagesInAllLootFolders = async (test = false) => {
+export const removeAnimalImagesInAllLootFolders = (test = false) => {
   getAllDirs('Loot').then(lootDirs => {
     lootDirs.forEach(dir => {
       removeAnimalImagesInLootFolder(dir, test)

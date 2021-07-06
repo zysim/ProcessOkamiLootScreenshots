@@ -16,6 +16,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @typedef {Object} ImageObj Object holding the Sharp instance of an image file, along
+ * with its filename and its containing directory's path.
+ * @property {string} dir The full path of the directory containing this image
+ * @property {sharp.Sharp} image The Sharp instance of the image to be processed
+ * @property {string} name The name of the image file
+ */
+
+/**
+ * @typedef {Object} ProcessedImageObj ImageObj with two extra details; the format to be
+ * saved as, along with its quality
+ * @property {string} dir The full path of the directory containing this image
+ * @property {string} format The format the image will be saved as
+ * @property {sharp.Sharp} image The Sharp instance of the image to be processed
+ * @property {string} name The name of the image file
+ * @property {number} quality The quality the image will be saved at
+ */
+
+/**
+ * @typedef {Object} MapperObj The meat and bones of this script. Specifies two things:
+ * the base input directory where all images to be processed in the same fashion are in,
+ * and the mapper function that processes all those images.
+ * @property {string} baseInputDir The starting input directory where all images to be
+ * processed in the same fashion are in
+ * @property {Mapper} mapper The function used to process every image contained in
+ * `baseInputDir`, including child folders
+ */
+
+/**
+ * @callback Mapper Takes the full path of an image (relative to project root), processes
+ * it, and saves it to the location specified in the function.
+ * @param {string} filepath The full image path, relative to this project's root
+ * @returns {Promise<?ProcessedImageObj>}
+ */
+
 import fs from 'fs/promises'
 import path from 'path'
 import sharp from 'sharp'
@@ -35,6 +70,11 @@ const curry =
   (...inner) =>
     f.apply(null, outer.concat(inner))
 
+/**
+ * @param {string} inputDir
+ * @param {string} filepath
+ * @returns {ImageObj}
+ */
 const prepImageObj = (inputDir, filepath) => {
   try {
     const { dir, name } = path.parse(filepath)
@@ -51,6 +91,10 @@ const prepImageObj = (inputDir, filepath) => {
   }
 }
 
+/**
+ * @param {{ height: number, width: number }}
+ * @param {ImageObj} imageObj
+ */
 const resizeImage = async ({ height, width }, imageObj) =>
   (await imageObj)
     ? {
@@ -62,6 +106,10 @@ const resizeImage = async ({ height, width }, imageObj) =>
 const resizeToFullHd = curry(resizeImage, { height: 1080, width: 1920 })
 const resizeTo720p = curry(resizeImage, { height: 720, width: 1280 })
 
+/**
+ * @param {Promise<ImageObj>} startImageObj
+ * @returns {Promise<?ImageObj>}
+ */
 const cropMyImage = async startImageObj => {
   try {
     const { height, width } = await startImageObj.image.metadata()
@@ -80,6 +128,12 @@ const cropMyImage = async startImageObj => {
   }
 }
 
+/**
+ * @param {string} format
+ * @param {number} quality
+ * @param {Promise<?ImageObj>} imageObj
+ * @returns {Promise<?ProcessedImageObj>}
+ */
 const saveImageAs = async (format, quality, imageObj) =>
   (await imageObj)
     ? {
@@ -90,10 +144,24 @@ const saveImageAs = async (format, quality, imageObj) =>
       }
     : null
 
+/**
+ * @callback SaveImageAsFormat
+ * @param {number} quality The quality to save the image at
+ * @param {Promise<?ImageObj>} imageObj The ImageObj to save
+ * @returns {Promise<?ProcessedImageObj>}
+ */
+
+/** @type {SaveImageAsFormat} */
 const saveImageAsJpeg = curry(saveImageAs, 'jpeg')
+/** @type {SaveImageAsFormat} */
 const saveImageAsWebp = curry(saveImageAs, 'webp')
+/** @type {SaveImageAsFormat} */
 const saveImageAsPng = curry(saveImageAs, 'png')
 
+/**
+ * @param {Promise<?ProcessedImageObj>} imageObj
+ * @returns {Promise<?ProcessedImageObj>}
+ */
 const writeImageToFile = async imageObj => {
   if ((await imageObj) == null) return null
   const { dir, format, image, name, quality } = await imageObj
@@ -111,6 +179,7 @@ const writeImageToFile = async imageObj => {
   return imageObj
 }
 
+/** @type MapperObj */
 const aurides = {
   baseInputDir: "Auride's",
   mapper: compose(
@@ -127,6 +196,7 @@ const aurides = {
   ),
 }
 
+/** @type MapperObj */
 const mine = {
   baseInputDir: IN_DIR,
   mapper: compose(
@@ -144,6 +214,7 @@ const mine = {
   ),
 }
 
+/** @type MapperObj */
 const kys = {
   baseInputDir: "Ky's",
   mapper: compose(
@@ -161,12 +232,30 @@ const kys = {
   ),
 }
 
+/**
+ * Runs the script.
+ *
+ * If `files` is not specified (default), this will:
+ * 1. Filter input images that already have corresponding processed images in `Out/`
+ * 1. Process the ones that remain, and saves them to `Out/`
+ *
+ * If `files` _is_ specified, this will:
+ * 1. Process and save images specified by `files`, overriding existing images in `Out`/
+ * if they exist
+ * @param {MapperObj} mapperObj
+ * @param {?string[]} [files=null]
+ */
 const run = async ({ baseInputDir, mapper }, files = null) =>
   (files
     ? files.map(f => `${baseInputDir}/${f}`)
     : await filterExistingFiles(baseInputDir, OUT_DIR)
   ).forEach(mapper)
 
+/**
+ * Prints the files to be processed only, without actually processing.
+ * @param {MapperObj} mapperObj
+ * @param {?string[]} [files=null]
+ */
 const test = async ({ baseInputDir }, files = null) =>
   files
     ? files.map(f => `${baseInputDir}/${f}`)
