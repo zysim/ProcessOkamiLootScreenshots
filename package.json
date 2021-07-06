@@ -8,7 +8,8 @@
     "start": "node main.js",
     "verify": "node verify.js",
     "clear": "rm -rf Out && mkdir Out",
-    "move": "node move.js"
+    "move": "node move.js",
+    "rm": "rm -rf CopyOver/* OkamiLootScreenshots/*"
   },
   "author": "",
   "license": "APGL-3.0-or-later",

@@ -167,7 +167,7 @@ const run = async ({ baseInputDir, mapper }, files = null) =>
     : await filterExistingFiles(baseInputDir, OUT_DIR)
   ).forEach(mapper)
 
-const test = async ({ baseInputDir, mapper }, files = null) =>
+const test = async ({ baseInputDir }, files = null) =>
   files
     ? files.map(f => `${baseInputDir}/${f}`)
     : await filterExistingFiles(baseInputDir, OUT_DIR)

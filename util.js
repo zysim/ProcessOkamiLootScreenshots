@@ -19,7 +19,12 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-const listAllFilesInDirectory = async dir => {
+/**
+ * Lists all files in a directory recursively. Returns full paths, relative to `dir`.
+ *
+ * @param {string} dir The base directory to search for files.
+ */
+export const listAllFilesInDirectory = async dir => {
   const [dirEnts, error] = await oneLiner(fs.readdir, dir, {
     withFileTypes: true,
   })
@@ -38,9 +43,7 @@ const listAllFilesInDirectory = async dir => {
 }
 
 export const filterExistingFiles = async (inDir, outDir) => {
-  const inputFilesWithoutExtensions = await listAllFilesInDirectory(
-    inDir,
-  )
+  const inputFilesWithoutExtensions = await listAllFilesInDirectory(inDir)
   const outputFiles = await listAllFilesInDirectory(outDir)
   const outputFilesWithoutExtensionsAndBaseDir = Array.from(
     new Set(outputFiles.map(file => file.replace(/-(50|FULL)\.\w+$/, ''))),
@@ -63,4 +66,71 @@ export const oneLiner = async (cb, ...args) => {
     console.error(e)
     return [null, e]
   }
+}
+
+/**
+ * Gets all directories in a base directory. Not recursive.
+ *
+ * Return paths include the base path itself.
+ * @param {string} base The path to the base directory.
+ */
+const getAllDirs = async base =>
+  (await fs.readdir(base, { withFileTypes: true })).reduce(
+    (dirs, file) =>
+      file.isDirectory() ? dirs.concat(path.join(base, file.name)) : dirs,
+    [],
+  )
+
+/**
+ * ## This was designed for OkamiMap, and not for this folder.
+ *
+ * Removes duplicate ANIMAL-ONLY images in a Loot folder, specified by `dir`, i.e. the
+ * images already exist in the corresponding Animals folder.
+ *
+ * This works under the assumption that combination images (ones that have animals+loot)
+ * have an underscore in its name.
+ * @param {string} dir The directory (aka map) to scan through
+ * @param {boolean} test Set this to `true` if you'd like to only see which files would
+ * be deleted, without the deletion actually happening. Defaults to `false`.
+ */
+export const removeAnimalImagesInLootFolder = async (dir, test = false) => {
+  try {
+    const animals = await fs.readdir(`./Animals/${dir}`)
+    const loot = await fs.readdir(`./Loot/${dir}`)
+    const dupes = loot.filter(
+      l =>
+        animals.find(a => path.parse(l).name === path.parse(a).name) &&
+        !path.parse(l).name.includes('_'),
+    )
+    console.log(`Deleting dupes in ./Loot/${dir}:`)
+    console.log(dupes)
+    if (!test) {
+      dupes.forEach(dupe => {
+        fs.rm(`./Loot/${dir}/${dupe}`)
+      })
+    }
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      console.log(`./Animals/${dir} doesn't exist yet.`)
+    } else {
+      console.error(e)
+    }
+  }
+}
+
+/**
+ * ## This was designed for OkamiMap, and not for this folder.
+ *
+ * Loops through all folders (maps) in the Loot folder and deletes ANIMAL-ONLY images
+ * that already exist in the Animals folders.
+ *
+ * @param {boolean} test Set to `true` to simply list out dupes without deleting
+ * anything. Defaults to `false`.
+ */
+export const removeAnimalImagesInAllLootFolders = async (test = false) => {
+  getAllDirs('Loot').then(lootDirs => {
+    lootDirs.forEach(dir => {
+      removeAnimalImagesInLootFolder(dir, test)
+    })
+  })
 }

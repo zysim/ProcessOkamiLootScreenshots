@@ -54,16 +54,20 @@ const copyFile = async (destDir, file) => {
   const dest = `${path.join(
     destDir,
     dir,
-    name.replace(/-(50|FULL)/g, '').replace(',', '_'),
+    name.replace(/-(50|FULL)/g, ''),
   )}${ext}`
 
   try {
     await fs.stat(path.join(destDir, dir))
   } catch (error) {
-    await fs.mkdir(path.join(destDir, dir))
+    if (error.code === 'ENOENT') {
+      await fs.mkdir(path.join(destDir, dir))
+    } else {
+      console.error({ destDir, file })
+      console.error(error)
+    }
   } finally {
-    console.log(`Copying ${file} to ${dest}`)
-    fs.copyFile(`Out/${file}`, dest)
+    await fs.copyFile(`Out/${file}`, dest)
   }
 }
 
@@ -92,18 +96,18 @@ const listFilesThatDidNotCopy = async () => {
   const storeFiles = await collectAllFilesInDirectory('OkamiLootScreenshots')
 
   return {
-    copyOver: filterAndCheck(outputFiles, copyFiles, '-50'),
-    store: filterAndCheck(outputFiles, storeFiles, '-FULL'),
+    copyOver: filterAndCheck(outputFiles, copyFiles, '-50').join('\n'),
+    store: filterAndCheck(outputFiles, storeFiles, '-FULL').join('\n'),
   }
 }
 
 const main = async () => {
   const { copy, store } = await getAndSeparateFiles()
 
-  copy.forEach(curry(copyFile, 'CopyOver'))
-  store.forEach(curry(copyFile, 'OkamiLootScreenshots'))
+  await Promise.all(copy.map(curry(copyFile, 'CopyOver')))
+  await Promise.all(store.map(curry(copyFile, 'OkamiLootScreenshots')))
 
-  console.log(await listFilesThatDidNotCopy())
+  console.table(await listFilesThatDidNotCopy())
 }
 
 main()
